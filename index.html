@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Psychology Difficulty Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Load html2canvas for PNG export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a0033, #330066);
+      margin: 0;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      text-shadow: 0 0 4px rgba(200, 130, 255, 0.5);
+    }
+    h1 {
+      margin-top: 25px;
+      font-size: 2.3em;
+      text-align: center;
+      padding: 0 10px;
+      color: #e1baff;
+      text-shadow: 0 0 12px #a34dff, 0 0 25px #6f1dce;
+    }
+    .container {
+      width: 95%;
+      max-width: 1100px;
+      margin: 20px 0;
+      padding: 14px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 25px rgba(162, 74, 255, 0.4);
+      backdrop-filter: blur(10px);
+    }
+    .unit-header {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin: 20px 0 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(162, 74, 255, 0.2);
+      color: #eacfff;
+      text-shadow: 0 0 6px #bb86fc;
+      box-shadow: inset 0 0 12px rgba(162, 74, 255, 0.6);
+    }
+    .topic {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 7px;
+      margin: 14px 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 15px rgba(162, 74, 255, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .topic:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 25px rgba(200, 120, 255, 0.7);
+    }
+    .topic-title {
+      font-size: 1.1em;
+      width: 54%;
+      font-weight: 600;
+      word-break: break-word;
+      padding-right: 10px;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+      justify-content: flex-end;
+      min-width: 180px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 7px;
+      border-radius: 4px;
+      background: #bbb;
+      cursor: pointer;
+      outline: none;
+      flex-shrink: 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px #a34dff;
+      transition: background 0.3s, transform 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #d7a6ff;
+      transform: scale(1.1);
+    }
+    input[type="range"]::-moz-range-thumb {
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px #a34dff;
+    }
+    .label {
+      font-size: 1em;
+      font-weight: bold;
+      padding: 6px 15px;
+      border-radius: 10px;
+      min-width: 121px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 10px rgba(200, 130, 255, 0.7);
+      flex-shrink: 0;
+    }
+    .dk { background: #8e24aa; }
+    .easy { background: #4caf50; }
+    .med { background: #fb8c00; }
+    .hard { background: #e53935; }
+    .btn {
+      padding: 13px 26px;
+      border: none;
+      margin: 11px 7px;
+      font-size: 1.11em;
+      border-radius: 10px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #a34dff, #6f1dce);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(162, 74, 255, 0.7);
+      transition: transform 0.2s, background 0.3s;
+      user-select: none;
+    }
+    .btn:hover,
+    .btn:focus {
+      outline: none;
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #6f1dce, #a34dff);
+    }
+    #report {
+      margin-top: 23px;
+      background: #1a0033;
+      color: #eee;
+      padding: 16px;
+      border-radius: 13px;
+      box-shadow: 0 0 20px rgba(162, 74, 255, 0.6);
+      width: 99%;
+      max-width: 505px;
+      margin-bottom: 28px;
+      word-break: break-word;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      /* Reduced font size for better fit */
+      font-size: 0.85em;
+    }
+    #report h2 {
+      color: #e1baff;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #bb86fc;
+    }
+    .report-item {
+      padding: 8px 6px;
+      margin: 5px 0;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.9em;
+      color: white;
+      box-shadow: 0 0 12px rgba(180, 90, 255, 0.4);
+      overflow-x: auto;
+      white-space: nowrap;
+      word-break: normal;
+    }
+    .report-item.dk { background: #8e24aa; }
+    .report-item.easy { background: #4caf50; }
+    .report-item.med { background: #fb8c00; }
+    .report-item.hard { background: #e53935; }
+    .summary {
+      margin-top: 12px;
+      font-size: 0.95em;
+      font-weight: bold;
+      color: #e1baff;
+      text-align: center;
+      text-shadow: 0 0 8px #a34dff;
+    }
+    footer {
+      margin: 20px 0 8px 0;
+      padding: 14px;
+      text-align: center;
+      font-size: 1em;
+      color: #eee;
+      text-shadow: 0 0 8px #a34dff;
+      user-select: none;
+    }
+
+    /* Responsive Fixes */
+    @media (max-width: 768px) {
+      body {
+        padding: 0 10px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      .container {
+        padding: 10px;
+      }
+      .topic {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .topic-title {
+        width: 100%;
+        font-size: 1em;
+      }
+      .slider-container {
+        width: 100%;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      input[type="range"] {
+        width: 100%;
+        max-width: 100%;
+      }
+      .label {
+        min-width: auto;
+        font-size: 0.9em;
+        padding: 6px 10px;
+      }
+      .btn {
+        width: 100%;
+        margin: 8px 0;
+        text-align: center;
+      }
+      #report {
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 0.85em;
+      }
+      #report .report-item {
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.4em;
+        line-height: 1.4;
+      }
+      .topic-title {
+        font-size: 0.9em;
+      }
+      .label {
+        font-size: 0.8em;
+        padding: 5px 8px;
+      }
+      input[type="range"] {
+        max-width: 180px;
+      }
+      #report {
+        padding: 12px;
+        font-size: 0.85em;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .report-item {
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Psychology Concepts Difficulty Tracker</h1>
+  <div class="container" id="tracker"></div>
+  <div>
+    <button class="btn" onclick="generateReport()">Generate Report</button>
+    <button class="btn" onclick="downloadPNG()">Download PNG</button>
+    <button class="btn" onclick="clearAll()">Clear All</button>
+  </div>
+  <div id="report"></div>
+  <footer>2025 Surbhi Sharma &nbsp; @surbhipsychtutor</footer>
+
+  <script>
+    const topics = [
+      { type: "header", text: "Unit I: Understanding Psychology" },
+      "Introduction","Nature of Psychology","Psychology as a Discipline","Psychology as a Natural Science","Psychology as a Social Science","Understanding Mind and Behaviour","Popular Notions about Psychology","Evolution of Psychology","Development of Psychology in India","Branches of Psychology","Psychology and Other Disciplines","Psychology in Everyday Life",
+      { type: "header", text: "Unit II: Methods of Enquiry in Psychology" },
+      "Introduction","Goals of Psychological Enquiry","Steps in Conducting Scientific Research","Alternative Paradigms of Research","Nature of Psychological Data","Observational Method","Experimental Method","Correlational Research","Survey Research","Psychological Testing","Case Study","Analysis of Data","Quantitative Method","Qualitative Method","Limitations of Psychological Enquiry","Ethical Issues",
+      { type: "header", text: "Unit III: Human Development" },
+      "Introduction","Meaning of Development","Life-Span Perspective on Development","Factors Influencing Development","Context of Development","Overview of Developmental Stages","Prenatal Stage","Infancy","Childhood","Challenges of Adolescence","Adulthood and Old Age",
+      { type: "header", text: "Unit IV: Sensory, Attentional and Perceptual Processes" },
+      "Introduction","Knowing the World","Nature and Varieties of Stimulus","Sense Modalities","Functional Limitation of Sense Organs","Attentional Processes","Selective Attention","Sustained Attention","Perceptual Processes","Processing Approaches in Perception","The Perceiver","Principles of Perceptual Organisation","Depth Perception ","Monocular Cues and Binocular Cues","Perceptual Constancies","Illusions","Socio-Cultural Influences on Perception",
+      { type: "header", text: "Unit V: Learning" },
+      "Introduction","Nature of Learning","Paradigms of Learning","Classical Conditioning","Determinants of Classical Conditioning","Operant/Instrumental Conditioning","Determinants of Operant Conditioning","Key Learning Processes","Observational Learning","Cognitive Learning","Verbal Learning","Skill Learning","Factors Facilitating Learning","Learning Disabilities",
+      { type: "header", text: "Unit VI: Human Memory" },
+      "Introduction","Nature of Memory","The Stage Model","Memory Systems: Sensory Memories","Short-term Memories","Long-term Memories","Levels of Processing","Types of Long-term Memory","Declarative Memory","Procedural Memory","Episodic Memory", "Semantic Memory","Nature of Forgetting","Causes of Forgetting","Forgetting due to Trace Decay","Forgetting due to Interference", "Retrieval Failure","Enhancing Memory","Mnemonics Images & Organisation",
+      { type: "header", text: "Unit VII: Thinking" },
+      "Introduction","Nature of Thinking","Building Blocks of Thought","The Processes of Thinking","Problem Solving","Reasoning","Decision-making","Nature of Creative Thinking","Process of Creative Thinking","Strategies of Creative Thinking","Thought and Language","Development of Language","Language Use",
+      { type: "header", text: "Unit VIII: Motivation and Emotion" },
+      "Introduction","Nature of Motivation","Types of Motives","Biological Motives","Psychosocial Motives","Maslow’s Hierarchy of Needs","Nature of Emotions","Expression of Emotions","Culture and Emotional Expression","Culture and Emotional Labeling","Managing Negative Emotions","Enhancing Positive Emotions"
+    ];
+
+    const levels = [
+      { label: "Don't Know", class: "dk" },
+      { label: "Easy", class: "easy" },
+      { label: "Medium", class: "med" },
+      { label: "Hard", class: "hard" }
+    ];
+
+    const container = document.getElementById("tracker");
+    let stored = JSON.parse(localStorage.getItem("trackerData")) || {};
+
+    topics.forEach((t, i) => {
+      if (typeof t === "object" && t.type === "header") {
+        const header = document.createElement("div");
+        header.className = "unit-header";
+        header.textContent = t.text;
+        container.appendChild(header);
+      } else {
+        const div = document.createElement("div");
+        div.className = "topic";
+        let savedVal = stored["q" + i] || 1;
+        div.innerHTML = `
+          <div class="topic-title">${t}</div>
+          <div class="slider-container">
+            <input type="range" min="1" max="4" value="${savedVal}" id="q${i}" class="slider" aria-label="Difficulty slider for ${t}">
+            <div class="label" id="label${i}" aria-live="polite" aria-atomic="true"></div>
+          </div>
+        `;
+        container.appendChild(div);
+        updateLabel(i, savedVal);
+        document.getElementById("q" + i).addEventListener("input", (e) => {
+          let val = e.target.value;
+          updateLabel(i, val);
+          stored["q" + i] = val;
+          localStorage.setItem("trackerData", JSON.stringify(stored));
+        });
+      }
+    });
+
+    function updateLabel(index, val) {
+      const label = document.getElementById("label" + index);
+      if (!label) return;
+      label.className = "label " + levels[val - 1].class;
+      label.textContent = levels[val - 1].label;
+    }
+
+    function generateReport() {
+      const reportDiv = document.getElementById("report");
+      reportDiv.innerHTML = "<h2>Your Report</h2>";
+      let counts = { dk: 0, easy: 0, med: 0, hard: 0 };
+      topics.forEach((t, i) => {
+        if (typeof t === "object") {
+          const unit = document.createElement("div");
+          unit.className = "unit-header";
+          unit.textContent = t.text;
+          reportDiv.appendChild(unit);
+        } else {
+          let val = stored["q" + i] || 1;
+          let obj = levels[val - 1];
+          const row = document.createElement("div");
+          row.className = `report-item ${obj.class}`;
+          row.textContent = `${t} — ${obj.label}`;
+          reportDiv.appendChild(row);
+          counts[obj.class]++;
+        }
+      });
+      const summary = document.createElement("div");
+      summary.className = "summary";
+      summary.innerHTML = `
+        Don't Know (Purple): ${counts.dk} &nbsp; | 
+        Easy (Green): ${counts.easy} &nbsp; | 
+        Medium (Orange): ${counts.med} &nbsp; | 
+        Hard (Red): ${counts.hard}
+      `;
+      reportDiv.appendChild(summary);
+      reportDiv.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function downloadPNG() {
+      const element = document.getElementById("report");
+      if (!element.innerHTML.trim()) {
+        alert("Please generate the report first!");
+        return;
+      }
+      // Save and reset scrollTop to capture full content
+      const scrollTopBackup = element.scrollTop;
+      element.scrollTop = 0;
+
+      html2canvas(element, { 
+        backgroundColor: "#1a0033", 
+        scale: 2,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        scrollY: -window.scrollY,
+        scrollX: -window.scrollX,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+      }).then((canvas) => {
+        const link = document.createElement("a");
+        link.download = "Psychology_Report.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        element.scrollTop = scrollTopBackup;  // Restore scroll position
+      });
+    }
+
+    function clearAll() {
+      if (!confirm("Are you sure you want to clear all your ratings?")) return;
+      localStorage.removeItem("trackerData");
+      stored = {};
+      topics.forEach((t, i) => {
+        let slider = document.getElementById("q" + i);
+        if (slider) {
+          slider.value = 1;
+          updateLabel(i, 1);
+        }
+      });
+      document.getElementById("report").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
